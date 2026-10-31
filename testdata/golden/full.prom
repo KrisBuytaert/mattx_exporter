@@ -1,0 +1,70 @@
+# HELP mattx_build_info Build information of mattx_exporter.
+# TYPE mattx_build_info gauge
+mattx_build_info{commit="abc123",goversion="go1.26",version="0.0.1"} 1
+# HELP mattx_exporter_scrape_errors_total Errors encountered while collecting, by collector.
+# TYPE mattx_exporter_scrape_errors_total counter
+mattx_exporter_scrape_errors_total{collector="host"} 0
+mattx_exporter_scrape_errors_total{collector="migration"} 0
+mattx_exporter_scrape_errors_total{collector="nodes"} 0
+# HELP mattx_node_affinity Scheduling affinity weight of the node.
+# TYPE mattx_node_affinity gauge
+mattx_node_affinity{ip="192.168.100.11",node="377"} 4000
+mattx_node_affinity{ip="192.168.100.12",node="378"} 2000
+mattx_node_affinity{ip="192.168.100.13",node="379"} 1000
+# HELP mattx_node_load CPU load of the node as reported in /proc/mattx/nodes.
+# TYPE mattx_node_load gauge
+mattx_node_load{ip="192.168.100.11",node="377"} 12
+mattx_node_load{ip="192.168.100.12",node="378"} 3
+mattx_node_load{ip="192.168.100.13",node="379"} 0
+# HELP mattx_node_mem_free_bytes Free memory of the node in bytes.
+# TYPE mattx_node_mem_free_bytes gauge
+mattx_node_mem_free_bytes{ip="192.168.100.11",node="377"} 1.572864e+09
+mattx_node_mem_free_bytes{ip="192.168.100.12",node="378"} 1.4680064e+09
+mattx_node_mem_free_bytes{ip="192.168.100.13",node="379"} 9.437184e+08
+# HELP mattx_node_up 1 if the node is in the cluster table, 0 if it was seen before and is gone.
+# TYPE mattx_node_up gauge
+mattx_node_up{ip="192.168.100.11",node="377"} 1
+mattx_node_up{ip="192.168.100.12",node="378"} 1
+mattx_node_up{ip="192.168.100.13",node="379"} 1
+# HELP mattx_migration_proc_available 1 if /proc/mattx/{guests,remote} is readable.
+# TYPE mattx_migration_proc_available gauge
+mattx_migration_proc_available 1
+# HELP mattx_guests_hosted Processes of other nodes currently hosted here.
+# TYPE mattx_guests_hosted gauge
+mattx_guests_hosted 1
+# HELP mattx_remote_processes Own processes currently running on other nodes.
+# TYPE mattx_remote_processes gauge
+mattx_remote_processes 2
+# HELP mattx_guest_process Hosted guest processes by comm and home node.
+# TYPE mattx_guest_process gauge
+mattx_guest_process{comm="stress",home_node="378"} 1
+# HELP mattx_remote_process Own processes running elsewhere by comm and target node.
+# TYPE mattx_remote_process gauge
+mattx_remote_process{comm="migtest",target_node="378"} 1
+mattx_remote_process{comm="migtest",target_node="379"} 1
+# HELP mattx_migrations_total Migration transitions seen here since the exporter started (out, hop, return, exit: own processes; in, departed: hosted guests).
+# TYPE mattx_migrations_total counter
+mattx_migrations_total{comm="migtest",direction="out"} 2
+mattx_migrations_total{comm="stress",direction="in"} 1
+# HELP mattx_pid_migrations_total Times this pid changed location (out, hop, return) since the exporter saw it.
+# TYPE mattx_pid_migrations_total counter
+mattx_pid_migrations_total{comm="migtest",pid="1234"} 1
+mattx_pid_migrations_total{comm="migtest",pid="1235"} 1
+mattx_pid_migrations_total{comm="stress",pid="2345"} 0
+# HELP mattx_pid_node Node a tracked pid runs on (role remote) or comes from (role guest).
+# TYPE mattx_pid_node gauge
+mattx_pid_node{comm="migtest",pid="1234",role="remote"} 378
+mattx_pid_node{comm="migtest",pid="1235",role="remote"} 379
+mattx_pid_node{comm="stress",pid="2345",role="guest"} 378
+# HELP mattx_module_loads_since_boot Times mattx.ko was loaded since boot.
+# TYPE mattx_module_loads_since_boot gauge
+mattx_module_loads_since_boot 2
+# HELP mattx_execmem_errors_since_boot Kernel 'execmem: unable to allocate' lines since boot.
+# TYPE mattx_execmem_errors_since_boot gauge
+mattx_execmem_errors_since_boot 1
+# HELP mattx_kdump_dirs Crash dump directories in the kdump directory.
+# TYPE mattx_kdump_dirs gauge
+mattx_kdump_dirs 3
+# HELP mattx_service_active 1 if the mattx systemd service is active.
+# TYPE mattx_service_active gauge
+mattx_service_active 1

@@ -1,0 +1,20 @@
+# HELP mattx_migration_proc_available 1 if /proc/mattx/{guests,remote} is readable.
+# TYPE mattx_migration_proc_available gauge
+mattx_migration_proc_available 1
+# HELP mattx_guests_hosted Processes of other nodes currently hosted here.
+# TYPE mattx_guests_hosted gauge
+mattx_guests_hosted 0
+# HELP mattx_remote_processes Own processes currently running on other nodes.
+# TYPE mattx_remote_processes gauge
+mattx_remote_processes 1
+# HELP mattx_guest_process Hosted guest processes by comm and home node.
+# TYPE mattx_guest_process gauge
+# HELP mattx_remote_process Own processes running elsewhere by comm and target node.
+# TYPE mattx_remote_process gauge
+mattx_remote_process{comm="migtest",target_node="378"} 1
+# HELP mattx_migrations_total Migration transitions seen here since the counter was created (out/return = own processes leaving/coming back; in/departed = guests arriving/leaving).
+# TYPE mattx_migrations_total counter
+mattx_migrations_total{direction="departed",comm="stress"} 1
+mattx_migrations_total{direction="in",comm="stress"} 1
+mattx_migrations_total{direction="out",comm="migtest"} 2
+mattx_migrations_total{direction="return",comm="migtest"} 1

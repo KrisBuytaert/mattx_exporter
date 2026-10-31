@@ -1,0 +1,12 @@
+# HELP mattx_module_loads_since_boot Times mattx.ko was loaded since boot.
+# TYPE mattx_module_loads_since_boot gauge
+mattx_module_loads_since_boot 0
+# HELP mattx_execmem_errors_since_boot Kernel 'execmem: unable to allocate' lines since boot.
+# TYPE mattx_execmem_errors_since_boot gauge
+mattx_execmem_errors_since_boot 0
+# HELP mattx_kdump_dirs Crash dump directories in /var/crash.
+# TYPE mattx_kdump_dirs gauge
+mattx_kdump_dirs 0
+# HELP mattx_service_active 1 if mattx.service is active.
+# TYPE mattx_service_active gauge
+mattx_service_active 0

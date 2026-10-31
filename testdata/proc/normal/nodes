@@ -1,0 +1,18 @@
+MattX Cluster Nodes:
+------------------------------------------------------------------------
+Node ID		IP Address	CPU Load	Affinity	Mem Free (MB)
+------------------------------------------------------------------------
+377 (Local)	192.168.100.11	12		4000		1500
+378		192.168.100.12	3		2000		1400
+379		192.168.100.13	0		1000		900
+
+Balancer Enabled: YES
+MattXFS Enabled: YES
+MPI Support: NO
+Accept Guests: YES
+HPC Local Libs: ON
+DSM Mode: 2
+Debug Mode: OFF
+Node Affinity: 0 (0 = Auto)
+Migration Excludes: sshd,systemd
+Migration Includes: migtest,stress, python3
