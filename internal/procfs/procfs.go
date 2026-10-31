@@ -2,12 +2,16 @@
 package procfs
 
 import (
+	"bufio"
 	"errors"
 	"io"
+	"io/fs"
+	"net"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
-
-// ErrNotImplemented marks API that exists but has no implementation yet.
-var ErrNotImplemented = errors.New("not implemented")
 
 // Node is one row of /proc/mattx/nodes.
 type Node struct {
@@ -49,17 +53,128 @@ type Snapshot struct {
 
 // ParseNodes parses /proc/mattx/nodes. Unparsable table rows are skipped and counted.
 func ParseNodes(r io.Reader) (Nodes, int, error) {
-	return Nodes{}, 0, ErrNotImplemented
+	n := Nodes{Settings: map[string]string{}}
+	malformed := 0
+	inTable := false
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		switch {
+		case line == "":
+			inTable = false
+		case strings.HasPrefix(line, "Node ID"):
+			inTable = true
+		case strings.HasPrefix(line, "---"), strings.HasPrefix(line, "MattX Cluster Nodes"):
+		case inTable:
+			node, ok := parseNodeRow(line)
+			if !ok {
+				malformed++
+				continue
+			}
+			n.Nodes = append(n.Nodes, node)
+		default:
+			if k, v, ok := strings.Cut(line, ":"); ok {
+				n.Settings[strings.TrimSpace(k)] = strings.TrimSpace(v)
+			}
+		}
+	}
+	return n, malformed, sc.Err()
+}
+
+// parseNodeRow parses "ID [(Local)] IP load affinity mem_mb".
+func parseNodeRow(line string) (Node, bool) {
+	f := strings.Fields(line)
+	var n Node
+	if len(f) > 1 && f[1] == "(Local)" {
+		n.Local = true
+		f = append(f[:1], f[2:]...)
+	}
+	if len(f) != 5 {
+		return Node{}, false
+	}
+	id, err := strconv.ParseInt(f[0], 10, 32)
+	if err != nil || net.ParseIP(f[1]) == nil {
+		return Node{}, false
+	}
+	var u [3]uint32
+	for i := range u {
+		v, err := strconv.ParseUint(f[2+i], 10, 32)
+		if err != nil {
+			return Node{}, false
+		}
+		u[i] = uint32(v)
+	}
+	n.ID, n.IP = int(id), f[1]
+	n.CPULoad, n.Affinity, n.MemFreeMB = u[0], u[1], u[2]
+	return n, true
 }
 
 // ParseEntries parses a guests or remote file. Unparsable lines are skipped and counted;
 // blank lines are ignored without counting.
 func ParseEntries(r io.Reader) ([]Entry, int, error) {
-	return nil, 0, ErrNotImplemented
+	var out []Entry
+	malformed := 0
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" {
+			continue
+		}
+		p, n, ok := strings.Cut(line, ":")
+		pid, err1 := strconv.ParseInt(strings.TrimSpace(p), 10, 32)
+		node, err2 := strconv.ParseInt(strings.TrimSpace(n), 10, 32)
+		if !ok || err1 != nil || err2 != nil || pid <= 0 || node < 0 {
+			malformed++
+			continue
+		}
+		out = append(out, Entry{PID: int(pid), Node: int(node)})
+	}
+	return out, malformed, sc.Err()
 }
 
 // Read reads nodes, guests and remote below dir. A missing dir or missing guests/remote
 // files is not an error: the snapshot is then simply not Available.
 func Read(dir string) (Snapshot, error) {
-	return Snapshot{}, ErrNotImplemented
+	var s Snapshot
+	guests, gok, gbad, err := readEntries(filepath.Join(dir, "guests"))
+	if err != nil {
+		return Snapshot{}, err
+	}
+	remote, rok, rbad, err := readEntries(filepath.Join(dir, "remote"))
+	if err != nil {
+		return Snapshot{}, err
+	}
+	s.Available = gok && rok
+	if s.Available {
+		s.Guests, s.Remote = guests, remote
+		s.Malformed += gbad + rbad
+	}
+	f, err := os.Open(filepath.Join(dir, "nodes"))
+	switch {
+	case err == nil:
+		defer f.Close()
+		nodes, bad, err := ParseNodes(f)
+		if err != nil {
+			return Snapshot{}, err
+		}
+		s.NodesOK, s.Nodes = true, nodes
+		s.Malformed += bad
+	case !errors.Is(err, fs.ErrNotExist):
+		return Snapshot{}, err
+	}
+	return s, nil
+}
+
+// readEntries reads one entry file; ok is false if it does not exist.
+func readEntries(path string) (entries []Entry, ok bool, malformed int, err error) {
+	f, err := os.Open(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, false, 0, nil
+	}
+	if err != nil {
+		return nil, false, 0, err
+	}
+	defer f.Close()
+	entries, malformed, err = ParseEntries(f)
+	return entries, err == nil, malformed, err
 }
