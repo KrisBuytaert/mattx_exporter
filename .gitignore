@@ -1,0 +1,7 @@
+/mattx_exporter
+/dist/
+/bin/
+*.test
+*.out
+*.rpm
+*.deb

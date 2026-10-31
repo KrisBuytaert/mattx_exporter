@@ -1,0 +1,26 @@
+name: ci
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: docker
+    container:
+      image: docker.io/library/golang:1.26
+    env:
+      PROMTOOL_VERSION: "2.55.1"
+      REQUIRE_PROMTOOL: "1"
+    steps:
+      - name: checkout
+        run: |
+          git clone --depth 1 --branch "${GITHUB_REF_NAME}" \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" .
+          git log -1 --oneline
+      - name: install promtool
+        run: |
+          curl -fsSL "https://github.com/prometheus/prometheus/releases/download/v${PROMTOOL_VERSION}/prometheus-${PROMTOOL_VERSION}.linux-amd64.tar.gz" \
+            | tar -xz --strip-components=1 -C /usr/local/bin "prometheus-${PROMTOOL_VERSION}.linux-amd64/promtool"
+          promtool --version
+      - name: go vet
+        run: go vet ./...
+      - name: go test
+        run: go test ./...
