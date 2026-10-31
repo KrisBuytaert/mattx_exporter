@@ -24,3 +24,8 @@ jobs:
         run: go vet ./...
       - name: go test
         run: go test ./...
+      - name: promtool check on the real binary output
+        run: |
+          CGO_ENABLED=0 go build -o /tmp/mattx_exporter ./cmd/mattx_exporter
+          printf 'proc_path: %s/testdata/proc/normal\nper_pid_metrics: true\ncollectors:\n  host: false\n' "$PWD" > /tmp/ci.yml
+          /tmp/mattx_exporter -config /tmp/ci.yml -print-metrics | promtool check metrics
