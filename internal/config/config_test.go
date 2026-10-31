@@ -80,7 +80,7 @@ func TestParseErrors(t *testing.T) {
 		{"bad regex exclude", "comm_exclude: [\"[\"]\n", "comm_exclude"},
 		{"zero poll interval", "poll_interval: 0s\n", "poll_interval"},
 		{"negative poll interval", "poll_interval: -1s\n", "poll_interval"},
-		{"bad duration", "poll_interval: soon\n", "poll_interval"},
+		{"bad duration", "poll_interval: soon\n", "line 1"},
 		{"negative max pids", "max_pids: -1\n", "max_pids"},
 		{"negative max comm labels", "max_comm_labels: -1\n", "max_comm_labels"},
 		{"negative retention", "pid_retention: -1s\n", "pid_retention"},
