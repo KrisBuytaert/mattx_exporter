@@ -49,6 +49,9 @@ type Snapshot struct {
 	Remote  []Entry
 	// Malformed counts lines that were skipped because they could not be parsed.
 	Malformed int
+	// Seq numbers the polls; the poller increments it per read so consumers can tell a
+	// new snapshot from one they already saw.
+	Seq uint64
 }
 
 // ParseNodes parses /proc/mattx/nodes. Unparsable table rows are skipped and counted.
