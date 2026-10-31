@@ -107,7 +107,7 @@ func TestOutAndReturn(t *testing.T) {
 }
 
 func TestRemoteExitIsNotAReturn(t *testing.T) {
-	h := newHarness(t, Options{})
+	h := newHarness(t, Options{PIDRetention: time.Minute})
 	h.step(nil, nil)
 	h.proc[100] = ProcInfo{"migtest", 7}
 	h.step(nil, []procfs.Entry{e(100, 2)})
@@ -194,7 +194,7 @@ func TestPIDReuseAfterGap(t *testing.T) {
 }
 
 func TestCommCachedAtFirstSight(t *testing.T) {
-	h := newHarness(t, Options{})
+	h := newHarness(t, Options{PIDRetention: time.Minute})
 	h.step(nil, nil)
 	h.proc[100] = ProcInfo{"migtest", 7}
 	h.step(nil, []procfs.Entry{e(100, 2)})
