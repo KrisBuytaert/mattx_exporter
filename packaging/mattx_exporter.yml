@@ -1,0 +1,26 @@
+# /etc/mattx_exporter.yml -- defaults of the packaged mattx_exporter.
+# Everything here equals the built-in default; change only what you need.
+listen_address: ":9105"
+proc_path: /proc/mattx
+poll_interval: 1s
+
+# Per-pid metrics are off by default (cardinality); the legacy
+# mattx_migrations_total and friends stay on until the cut-over.
+per_pid_metrics: false
+legacy_metrics: true
+
+max_comm_labels: 50
+max_pids: 200
+pid_retention: 5m
+
+# Host collector: kdump directories, kernel log, service state.
+kdump_dir: /var/crash
+journal_units: [mattx]
+service_unit: mattx
+module_load_regex: "Loading kernel module"
+execmem_regex: "execmem: unable"
+
+collectors:
+  nodes: true
+  migration: true
+  host: true

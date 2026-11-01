@@ -39,3 +39,9 @@ Tests use fixture `/proc/mattx` trees under `testdata/`; nothing needs the kerne
 
 GPL v2 only, the same license as MattX; see `LICENSE`. Go sources carry
 `SPDX-License-Identifier: GPL-2.0-only`.
+
+## Packaging
+
+`make rpm` builds `dist/mattx_exporter-<ver>-<rel>.x86_64.rpm` (static binary, systemd
+unit running as user `mattx_exporter`, `%config(noreplace) /etc/mattx_exporter.yml`) with
+fpm and checks it with `packaging/test-rpm.sh`. The unit is not enabled by the package.

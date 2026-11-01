@@ -1,0 +1,22 @@
+[Unit]
+Description=MattX Prometheus exporter
+Documentation=https://github.com/KrisBuytaert/mattx_exporter
+After=network.target
+
+[Service]
+Type=simple
+# Not root: /proc/mattx files are 0444, /var/crash is listable by anyone,
+# `systemctl is-active` needs no privilege, and kernel messages from journalctl
+# are readable with the systemd-journal group.
+User=mattx_exporter
+Group=mattx_exporter
+SupplementaryGroups=systemd-journal
+ExecStart=/usr/bin/mattx_exporter -config /etc/mattx_exporter.yml
+Restart=on-failure
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
