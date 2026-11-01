@@ -311,3 +311,23 @@ func TestMalformedProcLinesAreCountedAsScrapeErrors(t *testing.T) {
 		}
 	}
 }
+
+// MetricNames feeds the dashboard and alert tests, so it must match what is emitted.
+func TestMetricNamesMatchEmitted(t *testing.T) {
+	c, _ := scenario(t, allOn, okHost())
+	got := metricNames(t, c)
+	want := map[string]bool{}
+	for _, n := range MetricNames() {
+		want[n] = true
+	}
+	for n := range got {
+		if !want[n] {
+			t.Errorf("emitted but not in MetricNames: %s", n)
+		}
+	}
+	for n := range want {
+		if _, ok := got[n]; !ok && n != "mattx_migration_proc_available" {
+			t.Errorf("in MetricNames but not emitted: %s", n)
+		}
+	}
+}

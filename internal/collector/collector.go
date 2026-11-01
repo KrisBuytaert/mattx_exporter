@@ -5,6 +5,7 @@ package collector
 
 import (
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -220,4 +221,20 @@ func (c *Collector) collectHost(ch chan<- prometheus.Metric) {
 		v = 1
 	}
 	emit(descServiceUp, v, err)
+}
+
+// MetricNames returns every mattx_* metric name the collector can emit with all options
+// on. Dashboards and alert rules are tested against this set.
+func MetricNames() []string {
+	var names []string
+	for _, d := range []*prometheus.Desc{
+		descBuildInfo, descScrapeErr, descNodeLoad, descNodeMem, descNodeAffinity, descNodeUp,
+		descProcAvail, descGuestsHeld, descRemoteProcs, descGuestProc, descRemoteProc, descMigrations,
+		descPIDMigrations, descPIDNode, descModuleLoads, descExecmem, descKdump, descServiceUp,
+	} {
+		s := d.String() // Desc{fqName: "name", ...}
+		s = s[strings.Index(s, `"`)+1:]
+		names = append(names, s[:strings.Index(s, `"`)])
+	}
+	return names
 }
