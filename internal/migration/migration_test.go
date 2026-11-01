@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/procfs"
+	"github.com/KrisBuytaert/mattx_exporter/internal/procfs"
 )
 
 // fakeProc is a mutable stand-in for /proc/<pid>.

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/migration"
+	"github.com/KrisBuytaert/mattx_exporter/internal/migration"
 )
 
 func write(t *testing.T, dir, name, content string) {

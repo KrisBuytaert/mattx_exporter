@@ -18,8 +18,8 @@ import (
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/model"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/migration"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/procfs"
+	"github.com/KrisBuytaert/mattx_exporter/internal/migration"
+	"github.com/KrisBuytaert/mattx_exporter/internal/procfs"
 )
 
 type fakeSnap struct{ s procfs.Snapshot }

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/procfs"
+	"github.com/KrisBuytaert/mattx_exporter/internal/procfs"
 )
 
 // Direction classifies a migration event.

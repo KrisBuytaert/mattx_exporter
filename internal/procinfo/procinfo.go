@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/migration"
+	"github.com/KrisBuytaert/mattx_exporter/internal/migration"
 )
 
 // Lookup reads comm and start time of pid below root (normally /proc).

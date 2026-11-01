@@ -1,4 +1,4 @@
-module forgejo.lab.kribu.be/vox/mattx_exporter
+module github.com/KrisBuytaert/mattx_exporter
 
 go 1.26.10
 

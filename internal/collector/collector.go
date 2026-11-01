@@ -9,8 +9,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/migration"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/procfs"
+	"github.com/KrisBuytaert/mattx_exporter/internal/migration"
+	"github.com/KrisBuytaert/mattx_exporter/internal/procfs"
 )
 
 // Options selects what is exported. It mirrors the YAML config; policy lives there.

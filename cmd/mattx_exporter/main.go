@@ -23,12 +23,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/expfmt"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/collector"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/config"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/host"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/migration"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/poller"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/procinfo"
+	"github.com/KrisBuytaert/mattx_exporter/internal/collector"
+	"github.com/KrisBuytaert/mattx_exporter/internal/config"
+	"github.com/KrisBuytaert/mattx_exporter/internal/host"
+	"github.com/KrisBuytaert/mattx_exporter/internal/migration"
+	"github.com/KrisBuytaert/mattx_exporter/internal/poller"
+	"github.com/KrisBuytaert/mattx_exporter/internal/procinfo"
 )
 
 // Set at build time with -ldflags "-X main.version=... -X main.commit=...".

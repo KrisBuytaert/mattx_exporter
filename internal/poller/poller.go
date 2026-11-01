@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/migration"
-	"forgejo.lab.kribu.be/vox/mattx_exporter/internal/procfs"
+	"github.com/KrisBuytaert/mattx_exporter/internal/migration"
+	"github.com/KrisBuytaert/mattx_exporter/internal/procfs"
 )
 
 // Poller implements collector.SnapshotSource.
