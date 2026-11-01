@@ -38,6 +38,9 @@ Tests use fixture `/proc/mattx` trees under `testdata/`; nothing needs the kerne
 CI runs on Forgejo Actions (`.forgejo/workflows/ci.yml`). The GitHub repository
 `KrisBuytaert/mattx_exporter` is the source of truth and is pushed to; the Forgejo
 repository `vox/mattx_exporter` is a pull mirror of it (managed by tofu-forgejo).
+Mirror syncs do not trigger push workflows, so a timer-driven poller
+(`ci/poll-and-dispatch.sh`, see `ci/README.md`) dispatches the CI workflow for the
+mirror's own master tip and requests a mirror sync when GitHub is ahead.
 
 ## License
 
