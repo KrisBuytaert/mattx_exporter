@@ -35,6 +35,16 @@ Per-pid metrics (`per_pid_metrics`) are off by default; the legacy
 
 Tests use fixture `/proc/mattx` trees under `testdata/`; nothing needs the kernel module.
 
+## Releases
+
+A release is created by `.github/workflows/release.yml` when a tag `vX.Y.Z` is pushed to
+GitHub. It runs `make release-assets` (the same recipe as locally): a
+`mattx_exporter-<ver>-linux-amd64.tar.gz` (static binary, LICENSE, README), the RPM, the
+DEB and `SHA256SUMS`, and attaches them with generated release notes. Verify with
+`sha256sum -c SHA256SUMS`. Running the workflow by hand (workflow_dispatch) only builds and
+uploads workflow artifacts; it never creates a release. Releases are not signed yet.
+The Forgejo mirror and internal CI are unaffected (Forgejo reads `.forgejo/workflows` only).
+
 ## License
 
 GPL v2 only, the same license as MattX; see `LICENSE`. Go sources carry
