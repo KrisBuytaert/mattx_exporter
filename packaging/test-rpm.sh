@@ -6,10 +6,12 @@ RPM="$(realpath "${1:?usage: test-rpm.sh path.rpm}")"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 pass() { echo "PASS: $*"; }
 
-want=$'/etc/mattx_exporter.yml\n/usr/bin/mattx_exporter\n/usr/lib/systemd/system/mattx_exporter.service'
+want=$'/etc/mattx_exporter.yml\n/usr/bin/mattx_exporter\n/usr/lib/systemd/system/mattx_exporter.service\n/usr/share/mattx_exporter/alerts/mattx.rules.yml\n/usr/share/mattx_exporter/dashboards/grafana/mattx-exporter.json\n/usr/share/mattx_exporter/dashboards/perses/mattx-exporter.json'
 got=$(rpm -qlp "$RPM" | grep -v '^/usr/lib/\.build-id' | sort)
 [ "$got" = "$want" ] || fail "file list differs:"$'\n'"$got"
-pass "file list"
+rpm -qp --queryformat '[%{FILEMODES:perms} %{FILENAMES}\n]' "$RPM" | grep ' /usr/share/mattx_exporter/' | grep -v '^-rw-r--r-- ' && fail "dashboard/alert modes"
+rpm -qp --queryformat '[%{FILEMODES:perms} %{FILENAMES}\n]' "$RPM" | grep -q '^-rwxr-xr-x /usr/bin/mattx_exporter$' || fail "binary mode"
+pass "file list and modes"
 
 rpm -qp --configfiles "$RPM" | grep -qx /etc/mattx_exporter.yml || fail "config not flagged as config"
 rpm -qp --queryformat '[%{FILEFLAGS:fflags} %{FILENAMES}\n]' "$RPM" | grep -q '^c.*n.* /etc/mattx_exporter.yml' || fail "config is not noreplace"

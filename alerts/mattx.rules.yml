@@ -1,0 +1,60 @@
+# EXAMPLE Prometheus alert rules for mattx_exporter. Nothing is sent anywhere by the
+# exporter: these only fire inside Prometheus, and delivery depends on your own Alertmanager
+# routing. Leave the file out if you do not want alerts. Thresholds and `for:` durations are
+# examples to tune. Each rule explains itself in its annotations (and see the README table).
+groups:
+  - name: mattx
+    rules:
+      - alert: MattxExporterDown
+        expr: up{job=~".*mattx.*"} == 0
+        for: 5m # a reboot or package upgrade takes a minute or two; 5m avoids paging on those
+        labels: {severity: warning}
+        annotations:
+          summary: "mattx_exporter on {{ $labels.instance }} cannot be scraped"
+          description: >-
+            Prometheus has failed to scrape the exporter for 5 minutes. Check that the node is up and that
+            the mattx_exporter service runs (systemctl status mattx_exporter) and listens on its port.
+            It does not mean the MattX cluster itself is broken, only that this node is not being observed.
+
+      - alert: MattxNodeDown
+        expr: mattx_node_up == 0
+        for: 5m # nodes reboot during deploys; they are back in the table well within 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Node {{ $labels.node }} ({{ $labels.ip }}) left the MattX cluster table, seen from {{ $labels.instance }}"
+          description: >-
+            A node that was in /proc/mattx/nodes is gone for 5 minutes (powered off, network cut, or mattx
+            unloaded there). Check that node and its mattx service; migrated processes on it may be lost.
+            It does not fire for a node that was never seen by this exporter since it started.
+
+      - alert: MattxExecmemErrors
+        expr: mattx_execmem_errors_since_boot > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }} logged 'execmem: unable to allocate' since boot"
+          description: >-
+            Loading mattx.ko failed on this boot because the kernel could not allocate executable memory
+            (seen on small-memory nodes after repeated module loads). Reboot the node, then load the module
+            once. It stays active until the next reboot; it does not mean the module is failing right now.
+
+      - alert: MattxKdumpDirsIncreased
+        expr: increase(mattx_kdump_dirs[1h]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "A new crash dump appeared on {{ $labels.instance }}"
+          description: >-
+            The kdump directory (default /var/crash) gained an entry in the last hour, so the node kernel
+            crashed and rebooted. Keep the dump and the kernel log for debugging. It does not fire for
+            dumps that were already there when the exporter started, and it clears after an hour.
+
+      - alert: MattxNodeLowMemory
+        expr: mattx_node_mem_free_bytes < 100 * 1024 * 1024 # example threshold: 100 MiB
+        for: 15m # short dips during migration or tests are normal
+        labels: {severity: warning}
+        annotations:
+          summary: "Node {{ $labels.node }} has under 100 MiB free memory, seen from {{ $labels.instance }}"
+          description: >-
+            The node has had little free memory for 15 minutes; MattX may refuse to migrate processes
+            there. Check what runs on it or add memory. Tune the threshold to your node sizes. It is the
+            value reported in /proc/mattx/nodes, not the kernel MemAvailable.

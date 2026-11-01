@@ -173,9 +173,14 @@ func TestAlertRules(t *testing.T) {
 		t.Fatal(err)
 	}
 	ok := allowed()
-	for _, m := range metricRe.FindAllString(string(data), -1) {
-		if !ok[m] {
-			t.Errorf("rules: unknown metric %s", m)
+	for _, line := range strings.Split(string(data), "\n") {
+		if !strings.Contains(line, "expr:") {
+			continue
+		}
+		for _, m := range metricRe.FindAllString(line, -1) {
+			if !ok[m] {
+				t.Errorf("rules: unknown metric %s in %q", m, line)
+			}
 		}
 	}
 	path, err := exec.LookPath("promtool")

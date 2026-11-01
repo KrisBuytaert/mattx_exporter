@@ -16,9 +16,9 @@ field() { dpkg-deb -f "$DEB" "$1"; }
 pass "control: $(field Package) $(field Version) $(field Architecture) Depends: $(field Depends)"
 
 files=$(dpkg-deb -c "$DEB" | awk '$1 !~ /^d/ {print $1, $6}' | sed 's# \./# /#' | grep -v ' /usr/share/doc/mattx-exporter/changelog.gz$' | sort -k2)
-want=$'-rw-r--r-- /etc/mattx_exporter.yml\n-rwxr-xr-x /usr/bin/mattx_exporter\n-rw-r--r-- /usr/lib/systemd/system/mattx_exporter.service'
+want=$'-rw-r--r-- /etc/mattx_exporter.yml\n-rwxr-xr-x /usr/bin/mattx_exporter\n-rw-r--r-- /usr/lib/systemd/system/mattx_exporter.service\n-rw-r--r-- /usr/share/mattx_exporter/alerts/mattx.rules.yml\n-rw-r--r-- /usr/share/mattx_exporter/dashboards/grafana/mattx-exporter.json\n-rw-r--r-- /usr/share/mattx_exporter/dashboards/perses/mattx-exporter.json'
 [ "$files" = "$(echo "$want" | sort -k2)" ] || fail "files/modes differ:"$'\n'"$files"
-pass "exactly three files with the right modes (plus fpm's policy changelog.gz)"
+pass "exactly six files with the right modes (plus fpm's policy changelog.gz)"
 
 conf=$(dpkg-deb -I "$DEB" conffiles)
 [ "$conf" = /etc/mattx_exporter.yml ] || fail "conffiles: $conf"

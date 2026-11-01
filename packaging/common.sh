@@ -17,4 +17,10 @@ stage_tree() {
     -o "$stage/usr/bin/mattx_exporter" ./cmd/mattx_exporter
   install -m 0644 packaging/mattx_exporter.yml "$stage/etc/mattx_exporter.yml"
   install -m 0644 packaging/mattx_exporter.service "$stage/$1/mattx_exporter.service"
+  # example dashboards and alert rules: not auto-provisioned, import by hand
+  local share="$stage/usr/share/mattx_exporter"
+  install -d "$share/dashboards/grafana" "$share/dashboards/perses" "$share/alerts"
+  install -m 0644 dashboards/grafana/mattx-exporter.json "$share/dashboards/grafana/"
+  install -m 0644 dashboards/perses/mattx-exporter.json "$share/dashboards/perses/"
+  install -m 0644 alerts/mattx.rules.yml "$share/alerts/"
 }

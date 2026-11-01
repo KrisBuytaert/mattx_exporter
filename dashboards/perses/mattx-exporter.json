@@ -1,0 +1,808 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "mattx-exporter",
+    "project": "default"
+  },
+  "spec": {
+    "display": {
+      "name": "MattX exporter",
+      "description": "Cluster nodes, process migration, host health and exporter health from mattx_exporter. Variables: job (regex, default .*mattx.*), instance."
+    },
+    "duration": "1h",
+    "refreshInterval": "30s",
+    "variables": [
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "job",
+          "display": {
+            "name": "Job (regex)"
+          },
+          "value": ".*mattx.*"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "instance",
+          "display": {
+            "name": "Instance"
+          },
+          "allowMultiple": true,
+          "allowAllValue": true,
+          "defaultValue": "$__all",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "labelName": "instance",
+              "matchers": [
+                "mattx_build_info{job=~\"$job\"}"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "panels": {
+      "nodes_table": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Cluster nodes",
+            "description": "Each node as seen from the selected instance(s): load, free memory, affinity and presence (/proc/mattx/nodes)."
+          },
+          "plugin": {
+            "kind": "Table",
+            "spec": {
+              "transforms": [
+                {
+                  "kind": "JoinByColumnValue",
+                  "spec": {
+                    "columns": [
+                      "node"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_load{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "load"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_mem_free_bytes{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "mem free"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_affinity{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "affinity"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_up{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "up"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "node_load": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node load",
+            "description": "mattx_node_load: CPU load of each node as reported in /proc/mattx/nodes."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_load{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}} sees node {{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "node_mem": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node free memory",
+            "description": "mattx_node_mem_free_bytes per node."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "bytes"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_mem_free_bytes{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}} sees node {{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "node_aff": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node affinity",
+            "description": "mattx_node_affinity: scheduling weight of each node."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_affinity{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}} sees node {{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "node_up": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Node up",
+            "description": "1 if the node is in the cluster table, 0 if it was seen before and is gone."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_node_up{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}} sees node {{node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "moves": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Migrations",
+            "description": "Migration transitions in the interval by direction (out, hop, return, exit: own processes; in, departed: hosted guests) and process name."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "visual": {
+                "display": "bar"
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum by (instance, direction, comm) (increase(mattx_migrations_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])) > 0",
+                    "seriesNameFormat": "{{instance}} {{direction}} {{comm}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "guests": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Guests hosted",
+            "description": "Processes of other nodes currently hosted here."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_guests_hosted{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "remote": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Own processes running elsewhere",
+            "description": "Processes started here that currently run on other nodes."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_remote_processes{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "where": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Where own processes run",
+            "description": "mattx_remote_process by process name and target node."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum by (instance, comm, target_node) (mattx_remote_process{job=~\"$job\",instance=~\"$instance\"})",
+                    "seriesNameFormat": "{{instance}}: {{comm}} -> node {{target_node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "guestproc": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Hosted guests by home node",
+            "description": "mattx_guest_process by process name and the node they come from."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum by (instance, comm, home_node) (mattx_guest_process{job=~\"$job\",instance=~\"$instance\"})",
+                    "seriesNameFormat": "{{instance}}: {{comm}} <- node {{home_node}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "pidmig": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Migrations per pid (needs per_pid_metrics: true)",
+            "description": "mattx_pid_migrations_total only exists when the exporter runs with per_pid_metrics: true in /etc/mattx_exporter.yml (off by default because of cardinality). Empty otherwise."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "topk(10, mattx_pid_migrations_total{job=~\"$job\",instance=~\"$instance\"})",
+                    "seriesNameFormat": "{{instance}} pid {{pid}} {{comm}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "service": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "mattx service active",
+            "description": "1 if the mattx systemd service is active."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_service_active{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "kdump": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "kdump directories",
+            "description": "Crash dump directories in the kdump directory."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_kdump_dirs{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "modloads": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Module loads since boot",
+            "description": "Times mattx.ko was loaded since boot."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_module_loads_since_boot{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "execmem": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "execmem errors since boot",
+            "description": "Kernel 'execmem: unable to allocate' lines since boot."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_execmem_errors_since_boot{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "up": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Exporter up",
+            "description": "Prometheus scrape success of the exporter."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "up{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "{{instance}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "scrape_err": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Exporter scrape errors (5m)",
+            "description": "Errors while collecting, by collector."
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "increase(mattx_exporter_scrape_errors_total{job=~\"$job\",instance=~\"$instance\"}[5m])",
+                    "seriesNameFormat": "{{instance}} {{collector}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "build": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Exporter build",
+            "description": "Version, commit and Go version of each exporter."
+          },
+          "plugin": {
+            "kind": "Table",
+            "spec": {
+              "transforms": [
+                {
+                  "kind": "JoinByColumnValue",
+                  "spec": {
+                    "columns": [
+                      "instance"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "mattx_build_info{job=~\"$job\",instance=~\"$instance\"}",
+                    "seriesNameFormat": "build"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Cluster nodes"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/nodes_table"
+              }
+            },
+            {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/node_load"
+              }
+            },
+            {
+              "x": 12,
+              "y": 8,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/node_mem"
+              }
+            },
+            {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/node_aff"
+              }
+            },
+            {
+              "x": 12,
+              "y": 15,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/node_up"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Migrations"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/moves"
+              }
+            },
+            {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/guests"
+              }
+            },
+            {
+              "x": 12,
+              "y": 7,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/remote"
+              }
+            },
+            {
+              "x": 0,
+              "y": 14,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/where"
+              }
+            },
+            {
+              "x": 12,
+              "y": 14,
+              "width": 12,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/guestproc"
+              }
+            },
+            {
+              "x": 0,
+              "y": 21,
+              "width": 24,
+              "height": 7,
+              "content": {
+                "$ref": "#/spec/panels/pidmig"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Host health"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/service"
+              }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/kdump"
+              }
+            },
+            {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/modloads"
+              }
+            },
+            {
+              "x": 12,
+              "y": 6,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/execmem"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Exporter health"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/up"
+              }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/scrape_err"
+              }
+            },
+            {
+              "x": 0,
+              "y": 6,
+              "width": 24,
+              "height": 5,
+              "content": {
+                "$ref": "#/spec/panels/build"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
