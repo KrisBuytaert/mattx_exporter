@@ -1,0 +1,9 @@
+#!/bin/sh
+# Never deletes the mattx_exporter user. dpkg itself removes the conffile on purge.
+set -e
+case "$1" in
+remove|purge)
+    if [ -d /run/systemd/system ]; then systemctl daemon-reload >/dev/null 2>&1 || true; fi
+    ;;
+esac
+exit 0

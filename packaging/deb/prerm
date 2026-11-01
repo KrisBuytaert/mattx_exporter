@@ -1,0 +1,9 @@
+#!/bin/sh
+# Stop a running service on removal; the user and config are kept.
+set -e
+case "$1" in
+remove|deconfigure)
+    if [ -d /run/systemd/system ]; then systemctl stop mattx_exporter.service >/dev/null 2>&1 || true; fi
+    ;;
+esac
+exit 0

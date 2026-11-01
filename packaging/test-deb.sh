@@ -8,17 +8,17 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 pass() { echo "PASS: $*"; }
 
 field() { dpkg-deb -f "$DEB" "$1"; }
-[ "$(field Package)" = mattx_exporter ] || fail "Package: $(field Package)"
+[ "$(field Package)" = mattx-exporter ] || fail "Package: $(field Package)"
 [[ "$(field Version)" =~ ^[0-9][0-9A-Za-z.+~]*-[0-9A-Za-z.+~]+$ ]] || fail "Version not dpkg-valid: $(field Version)"
 [ "$(field Architecture)" = amd64 ] || fail "Architecture: $(field Architecture)"
 [ "$(field Depends)" = systemd ] || fail "Depends: '$(field Depends)' (want exactly systemd)"
 [ "$(field License)" = GPL-2.0-only ] || fail "License: '$(field License)'"
 pass "control: $(field Package) $(field Version) $(field Architecture) Depends: $(field Depends)"
 
-files=$(dpkg-deb -c "$DEB" | awk '$1 !~ /^d/ {print $1, $6}' | sed 's# \./# /#' | sort -k2)
+files=$(dpkg-deb -c "$DEB" | awk '$1 !~ /^d/ {print $1, $6}' | sed 's# \./# /#' | grep -v ' /usr/share/doc/mattx-exporter/changelog.gz$' | sort -k2)
 want=$'-rw-r--r-- /etc/mattx_exporter.yml\n-rwxr-xr-x /usr/bin/mattx_exporter\n-rw-r--r-- /usr/lib/systemd/system/mattx_exporter.service'
 [ "$files" = "$(echo "$want" | sort -k2)" ] || fail "files/modes differ:"$'\n'"$files"
-pass "exactly three files with the right modes"
+pass "exactly three files with the right modes (plus fpm's policy changelog.gz)"
 
 conf=$(dpkg-deb -I "$DEB" conffiles)
 [ "$conf" = /etc/mattx_exporter.yml ] || fail "conffiles: $conf"

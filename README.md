@@ -42,6 +42,10 @@ GPL v2 only, the same license as MattX; see `LICENSE`. Go sources carry
 
 ## Packaging
 
-`make rpm` builds `dist/mattx_exporter-<ver>-<rel>.x86_64.rpm` (static binary, systemd
-unit running as user `mattx_exporter`, `%config(noreplace) /etc/mattx_exporter.yml`) with
-fpm and checks it with `packaging/test-rpm.sh`. The unit is not enabled by the package.
+`make rpm` builds `dist/mattx_exporter-<ver>-<rel>.x86_64.rpm` and `make deb` builds
+`dist/mattx-exporter_<ver>_amd64.deb` (Debian names cannot contain underscores) with fpm,
+each checked by `packaging/test-rpm.sh` / `packaging/test-deb.sh`. Both ship the static
+binary `/usr/bin/mattx_exporter`, the systemd unit (runs as user `mattx_exporter`, not
+enabled by the package) and `/etc/mattx_exporter.yml` (preserved on upgrade: `%config(noreplace)`
+/ dpkg conffile). Deb version: `<tag>-1`, or `<tag or 0.0.0>+<commits>.g<sha>-1`. The deb
+removal keeps the user; purge removes the config only.

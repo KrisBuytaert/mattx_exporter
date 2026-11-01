@@ -5,26 +5,10 @@
 # (or 1.<dist> exactly on a tag). DIST defaults to fc44 like the other vox-extras packages;
 # the binary is static, the package has no library dependencies.
 set -euo pipefail
-cd "$(dirname "$0")/.."
-OUT_DIR="${OUT_DIR:-$PWD/dist}"
+source "$(dirname "$0")/common.sh"
 DIST="${DIST:-fc44}"
-sha=$(git rev-parse --short HEAD)
-tag=$(git describe --tags --abbrev=0 2>/dev/null || true)
-if [ -n "$tag" ]; then
-  ver=${tag#v}
-  n=$(git rev-list --count "$tag"..HEAD)
-else
-  ver=0.0.0; n=$(git rev-list --count HEAD)
-fi
 if [ "$n" = 0 ] && [ -n "$tag" ]; then rel="1.$DIST"; else rel="0.$n.g$sha.$DIST"; fi
-describe=$(git describe --tags --always --dirty)
-
-stage=$(mktemp -d); trap 'rm -rf "$stage"' EXIT
-install -d "$stage/usr/bin" "$stage/etc" "$stage/usr/lib/systemd/system"
-CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$describe -X main.commit=$sha" \
-  -o "$stage/usr/bin/mattx_exporter" ./cmd/mattx_exporter
-install -m 0644 packaging/mattx_exporter.yml "$stage/etc/mattx_exporter.yml"
-install -m 0644 packaging/mattx_exporter.service "$stage/usr/lib/systemd/system/mattx_exporter.service"
+stage_tree usr/lib/systemd/system; trap 'rm -rf "$stage"' EXIT
 
 mkdir -p "$OUT_DIR"
 rm -f "$OUT_DIR"/mattx_exporter-"$ver"-"$rel".x86_64.rpm

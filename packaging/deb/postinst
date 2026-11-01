@@ -1,0 +1,19 @@
+#!/bin/sh
+# Creates the service account. Does NOT enable or start the service (puppet does).
+set -e
+case "$1" in
+configure)
+    if ! getent passwd mattx_exporter >/dev/null; then
+        if command -v adduser >/dev/null 2>&1; then
+            adduser --system --group --no-create-home --home /nonexistent \
+                --shell /usr/sbin/nologin --gecos 'mattx_exporter service account' mattx_exporter
+        else
+            getent group mattx_exporter >/dev/null || groupadd --system mattx_exporter
+            useradd --system --gid mattx_exporter --no-create-home --home-dir /nonexistent \
+                --shell /usr/sbin/nologin --comment 'mattx_exporter service account' mattx_exporter
+        fi
+    fi
+    if [ -d /run/systemd/system ]; then systemctl daemon-reload >/dev/null 2>&1 || true; fi
+    ;;
+esac
+exit 0
