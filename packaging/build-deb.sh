@@ -8,14 +8,13 @@
 # and what Debian trixie+ policy expects (avoids usrmerge /lib aliasing problems).
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
-ARCH="${ARCH:-amd64}"
 if [ "$n" = 0 ] && [ -n "$tag" ]; then debver="$ver-1"; else debver="$ver+$n.g$sha-1"; fi
 stage_tree usr/lib/systemd/system; trap 'rm -rf "$stage"' EXIT
 
 mkdir -p "$OUT_DIR"
-out="$OUT_DIR/mattx-exporter_${debver}_${ARCH}.deb"
+out="$OUT_DIR/mattx-exporter_${debver}_amd64.deb"
 rm -f "$out"
-fpm -s dir -t deb --name mattx-exporter --version "${debver%-1}" --iteration 1 --architecture "$ARCH" \
+fpm -s dir -t deb --name mattx-exporter --version "${debver%-1}" --iteration 1 --architecture amd64 \
   --license GPL-2.0-only --url https://github.com/KrisBuytaert/mattx_exporter \
   --maintainer "Kris Buytaert <KrisBuytaert@users.noreply.github.com>" \
   --description "Prometheus exporter for the MattX SSI cluster kernel module" \
