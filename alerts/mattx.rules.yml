@@ -48,13 +48,14 @@ groups:
             crashed and rebooted. Keep the dump and the kernel log for debugging. It does not fire for
             dumps that were already there when the exporter started, and it clears after an hour.
 
-      - alert: MattxNodeLowMemory
-        expr: mattx_node_mem_free_bytes < 100 * 1024 * 1024 # example threshold: 100 MiB
-        for: 15m # short dips during migration or tests are normal
+      - alert: MattxExporterScrapeErrors
+        expr: rate(mattx_exporter_scrape_errors_total[10m]) > 0
+        for: 10m # a single bad read of /proc/mattx or journalctl is not worth a notification
         labels: {severity: warning}
         annotations:
-          summary: "Node {{ $labels.node }} has under 100 MiB free memory, seen from {{ $labels.instance }}"
+          summary: "mattx_exporter on {{ $labels.instance }} keeps failing to collect ({{ $labels.collector }})"
           description: >-
-            The node has had little free memory for 15 minutes; MattX may refuse to migrate processes
-            there. Check what runs on it or add memory. Tune the threshold to your node sizes. It is the
-            value reported in /proc/mattx/nodes, not the kernel MemAvailable.
+            The exporter has had errors in its {{ $labels.collector }} collector for 10 minutes: for example
+            /proc/mattx unreadable or malformed (migration, nodes) or journalctl/systemctl failing (host).
+            Check the exporter log (journalctl -u mattx_exporter) and that the mattx module is loaded.
+            Metrics from the other collectors are still valid; it does not mean the cluster is unhealthy.

@@ -177,6 +177,9 @@ func TestAlertRules(t *testing.T) {
 		if !strings.Contains(line, "expr:") {
 			continue
 		}
+		if strings.Contains(line, "node_memory") || strings.Contains(line, "node_cpu") || strings.Contains(line, "node_load") {
+			t.Errorf("rules must only use exporter metrics, not node_exporter: %q", line)
+		}
 		for _, m := range metricRe.FindAllString(line, -1) {
 			if !ok[m] {
 				t.Errorf("rules: unknown metric %s in %q", m, line)
