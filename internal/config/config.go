@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Package config loads /etc/mattx_exporter.yml. All policy (which processes to track,
 // limits, paths) lives in that file; the program only supplies defaults.
 package config

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Package host collects the host-level facts of the legacy mattx-node-metrics.sh:
 // module loads and execmem errors since boot, kdump directories and service state.
 package host

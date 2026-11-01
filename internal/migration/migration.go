@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Package migration turns successive /proc/mattx snapshots into migration events,
 // counters and per-pid state. Entries are tracked by pid, not by comm.
 package migration

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Package procfs parses the files the MattX kernel module exposes under /proc/mattx.
 package procfs
 

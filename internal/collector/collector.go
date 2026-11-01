@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Package collector exposes tracker, node table and host state as Prometheus metrics.
 package collector
 

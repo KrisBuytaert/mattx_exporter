@@ -24,6 +24,8 @@ Kernel counters (`/proc/mattx/stats`) and netlink events are planned as later so
 
 Everything is configured in a YAML file (default `/etc/mattx_exporter.yml`); the
 program contains no policy such as process-name lists. Defaults are sane without a file.
+Per-pid metrics (`per_pid_metrics`) are off by default; the legacy
+`mattx_migrations_total` metric is always exported.
 
 ## Development
 
@@ -33,10 +35,11 @@ program contains no policy such as process-name lists. Defaults are sane without
 
 Tests use fixture `/proc/mattx` trees under `testdata/`; nothing needs the kernel module.
 
-CI runs on Forgejo Actions (`.forgejo/workflows/ci.yml`). The Forgejo repository
-`vox/mattx_exporter` is the source of truth; the GitHub repository is a push mirror.
+CI runs on Forgejo Actions (`.forgejo/workflows/ci.yml`). The GitHub repository
+`KrisBuytaert/mattx_exporter` is the source of truth and is pushed to; the Forgejo
+repository `vox/mattx_exporter` is a pull mirror of it (managed by tofu-forgejo).
 
 ## License
 
-Pending a decision by the maintainer (MattX itself is GPL v2). Until a license file is
-added, no license is granted.
+GPL v2 only, the same license as MattX; see `LICENSE`. Go sources carry
+`SPDX-License-Identifier: GPL-2.0-only`.

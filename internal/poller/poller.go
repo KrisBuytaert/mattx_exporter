@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Package poller reads /proc/mattx on an interval and feeds the migration tracker.
 package poller
 

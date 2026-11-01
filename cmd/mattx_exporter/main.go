@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 // Command mattx_exporter serves Prometheus metrics for the MattX kernel module.
 package main
 
